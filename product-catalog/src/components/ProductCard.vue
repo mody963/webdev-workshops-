@@ -1,52 +1,50 @@
 <script setup lang="ts">
+import type { Product } from '../types/Product'
+
 interface Props {
-  id: number
-  name: string
-  price: number
-  description: string
-  stock: number
-  category: string
+  product: Product
 }
 
 defineProps<Props>()
 
 const emit = defineEmits<{
   delete: [id: number]
-  edit: [id: number]
+  edit: [product: Product]
 }>()
 </script>
 
 <template>
   <div class="product-card">
     <div class="header">
-      <span class="badge">{{ category }}</span>
-      <h3>{{ name }}</h3>
+      <span class="badge">{{ product.category }}</span>
+      <h3>{{ product.name }}</h3>
     </div>
 
-    <p>${{ price.toFixed(2) }}</p>
-    <p>{{ description }}</p>
+    <p class="price">${{ product.price.toFixed(2) }}</p>
+    <p class="description">{{ product.description }}</p>
 
-    <!-- Stock Status Indicator -->
-    <p v-if="stock === 0" class="stock-status out-of-stock">Out of Stock</p>
-    <p v-else-if="stock < 5" class="stock-status low-stock">Low Stock ({{ stock }} left)</p>
-    <p v-else class="stock-status in-stock">In Stock: {{ stock }}</p>
+    <!-- Stock Indicator -->
+    <p v-if="product.stock === 0" class="stock-status out-of-stock">Out of Stock</p>
+    <p v-else-if="product.stock < 5" class="stock-status low-stock">Low Stock ({{ product.stock }} left)</p>
+    <p v-else class="stock-status in-stock">In Stock: {{ product.stock }}</p>
 
     <!-- Action Buttons -->
     <div class="actions">
-      <button @click="emit('edit', id)">Edit</button>
-      <button class="secondary" @click="emit('delete', id)">Delete</button>
+      <button type="button" @click="emit('edit', product)">Edit</button>
+      <button type="button" class="secondary" @click="emit('delete', product.id)">Delete</button>
     </div>
   </div>
 </template>
 
 <style scoped>
 .product-card {
-  border: 1px solid var(--color-border, #ddd);
-  border-radius: var(--radius, 8px);
+  border: 1px solid #ddd;
+  border-radius: 8px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  background-color: #fff;
 }
 
 .header {
@@ -61,11 +59,21 @@ const emit = defineEmits<{
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   background-color: #e2e8f0;
   color: #4a5568;
+}
+
+.price {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.description {
+  color: #64748b;
+  margin: 0;
 }
 
 .stock-status {

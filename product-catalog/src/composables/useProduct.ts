@@ -1,13 +1,6 @@
 import { ref, computed, watch } from 'vue'
 
-export interface Product {
-  id: number
-  name: string
-  price: number
-  description: string
-  stock: number
-  category: string
-}
+import type { Product } from '../types/Product'
 
 // export function useProducts() {
 //   // Reactive State
@@ -44,7 +37,7 @@ const expensiveWarning = computed(() => {
 })
   
   const lastSaved = ref<string | null>(null)
-  const editingId = ref<number | null>(null)
+  // const editingId = ref<number | null>(null)
 // Exercise 2 State: Track unsaved changes
   const hasUnsavedChanges = ref<boolean>(false)
 
@@ -92,14 +85,11 @@ const totalValue = computed(() => {
     products.value.push(newProduct)
   }
 
-  function updateProduct(id: number, updatedData: Omit<Product, 'id'>) {
-    const product = products.value.find(p => p.id === id)
+  function updateProduct(updatedProduct: Product) {
+    const product = products.value.find(p => p.id === updatedProduct.id)
+
     if (product) {
-      product.name = updatedData.name
-      product.price = updatedData.price
-      product.description = updatedData.description
-      product.stock = updatedData.stock
-      product.category = updatedData.category
+    Object.assign(product, updatedProduct)
     }
   }
 
@@ -113,7 +103,6 @@ const totalValue = computed(() => {
 
   return {
     products,
-    editingId,
     productCount,
     totalValue,
     averageProductPrice,

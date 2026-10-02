@@ -1,36 +1,52 @@
-form:
 <script setup lang="ts">
-import {ref} from 'vue'
+import { ref, watch } from 'vue'
+import type { Product } from '../types/Product'
 
-const newProductName = ref<string>('')
-const newProductPrice = ref<number>(0)
-const newProductDescription = ref<string>('')
-const newProductStock = ref<number>(0)
-const newProductCategory = ref<string>('')
-const formError = ref('')
+// 1. Receive the editingProduct prop (or null when creating)
+const props = defineProps<{
+  editingProduct: Product | null
+}>()
 
+// 2. Define all events this form can send to the parent
 const emit = defineEmits<{
- add: [
+  add: [
     name: string,
     price: number,
     description: string,
     stock: number,
     category: string
-]
+  ]
+  update: [product: Product]
+  cancel: []
 }>()
 
-function handleSubmit() {
- if (newProductName.value.trim() === '' || newProductPrice.value <= 0) {
-    formError.value = 'Please fill in all fields'
- return
- }
- emit('add', 
-    newProductName.value, 
-    newProductPrice.value, 
-    newProductDescription.value, 
-    newProductStock.value, 
-    newProductCategory.value)
+// Local form refs (synced via v-model)
+const newProductName = ref<string>('')
+const newProductPrice = ref<number>(0)
+const newProductDescription = ref<string>('')
+const newProductStock = ref<number>(0)
+const newProductCategory = ref<string>('')
+const formError = ref<string>('')
 
+// Watch the prop: populate refs when editing, reset when null
+watch(
+  () => props.editingProduct,
+  (product) => {
+    formError.value = ''
+    if (product) {
+      newProductName.value = product.name
+      newProductPrice.value = product.price
+      newProductDescription.value = product.description
+      newProductStock.value = product.stock
+      newProductCategory.value = product.category
+    } else {
+      resetInputs()
+    }
+  },
+  { immediate: true }
+)
+
+function resetInputs() {
   newProductName.value = ''
   newProductPrice.value = 0
   newProductDescription.value = ''
@@ -39,11 +55,51 @@ function handleSubmit() {
   formError.value = ''
 }
 
+function handleSubmit() {
+  // 1. Validate inputs
+  if (newProductName.value.trim() === '' || newProductPrice.value <= 0) {
+    formError.value = 'Please enter a valid name and price'
+    return
+  }
+
+  if (newProductStock.value < 0) {
+    formError.value = 'Stock cannot be negative'
+    return
+  }
+
+  // 2. Branch based on edit vs. create mode
+  if (props.editingProduct) {
+    // EDIT MODE: Create a fresh object keeping the existing ID
+    const updated: Product = {
+      id: props.editingProduct.id,
+      name: newProductName.value.trim(),
+      price: newProductPrice.value,
+      description: newProductDescription.value.trim(),
+      stock: newProductStock.value,
+      category: newProductCategory.value || 'General',
+    }
+
+    emit('update', updated)
+  } else {
+    // CREATE MODE: Emit the fields to add a brand new product
+    emit(
+      'add',
+      newProductName.value.trim(),
+      newProductPrice.value,
+      newProductDescription.value.trim(),
+      newProductStock.value,
+      newProductCategory.value || 'General'
+    )
+
+    // Clear form inputs only when creating a new product
+    resetInputs()
+  }
+}
 </script>
 
 <template>
- <form @submit.prevent="handleSubmit">
-    <!-- <h2>{{ editingId ? 'Edit Product' : 'Add New Product' }}</h2> -->
+  <form @submit.prevent="handleSubmit">
+    <h2>{{ editingProduct ? 'Edit Product' : 'Add Product' }}</h2>
 
     <label>
       Product Name
@@ -52,7 +108,7 @@ function handleSubmit() {
 
     <label>
       Price
-      <input v-model.number="newProductPrice" type="number" />
+      <input v-model.number="newProductPrice" type="number" step="0.01" min="0" />
     </label>
 
     <label>
@@ -62,30 +118,39 @@ function handleSubmit() {
 
     <label>
       Stock
-      <input v-model.number="newProductStock" type="number" />
+      <input v-model.number="newProductStock" type="number" min="0" />
     </label>
 
     <label>
       Category
       <select v-model="newProductCategory">
         <option disabled value="">--Please choose a category--</option>
-        <option>School</option>
-        <option>House</option>
-        <option>Books</option>
+        <option value="School">School</option>
+        <option value="House">House</option>
+        <option value="Books">Books</option>
       </select>
     </label>
 
-    <button type="submit">Add Product</button>
-      <!-- {{ editingId ? 'Update Product' : 'Add Product' }} -->
+    <!-- Dynamic button text based on mode -->
+    <button type="submit">
+      {{ editingProduct ? 'Update Product' : 'Add Product' }}
+    </button>
 
-    <!-- <button type="button" v-if="editingId !== null" @click="cancelEdit">Cancel edit</button> -->
+    <!-- Only show Cancel when actively editing -->
+    <button
+      v-if="editingProduct !== null"
+      type="button"
+      @click="emit('cancel')"
+    >
+      Cancel edit
+    </button>
 
     <p v-if="formError" class="form-error">{{ formError }}</p>
   </form>
 </template>
 
-<style>
-    .form-error {
-    color: red;
-    }
+<style scoped>
+.form-error {
+  color: red;
+}
 </style>
