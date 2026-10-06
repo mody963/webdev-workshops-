@@ -1,47 +1,49 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import ProductManagementPage from './pages/ProductManagementPage.vue'
-
-// Toggle state to mount / unmount the page
-const isPageVisible = ref<boolean>(true)
 </script>
 
 <template>
-  <div class="app-layout">
-    <header class="app-header">
-      <button type="button" @click="isPageVisible = !isPageVisible">
-        {{ isPageVisible ? 'Hide Product Management' : 'Show Product Management' }}
-      </button>
-    </header>
 
-    <!-- v-if controls mounting and destruction -->
-    <ProductManagementPage v-if="isPageVisible" />
-    <p v-else class="status-message">
-      Product Management is currently unmounted. Pressing <kbd>Escape</kbd> will do nothing because the listener was cleaned up!
-    </p>
-  </div>
+  <header>
+    <nav>
+      <RouterLink to="/Home">Home</RouterLink>
+      <RouterLink to="/products">Products</RouterLink>
+      <RouterLink to="/about">About</RouterLink>
+    </nav>
+  </header>
+
+  <main>
+    <RouterView />
+  </main>
 </template>
 
 <style scoped>
-.app-layout {
-  padding: 1.5rem;
-  max-width: 1100px;
-  margin: 0 auto;
-  font-family: inherit;
+header {
+  width: 100%;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.app-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
+nav {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.status-message {
-  margin-top: 2rem;
-  color: #64748b;
-  font-style: italic;
-  padding: 1.5rem;
-  border: 1px dashed #cbd5e1;
-  border-radius: 8px;
+nav a {
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+}
+
+nav a.router-link-active {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+}
+
+main {
+  width: 80%;
+  margin: auto;
 }
 </style>

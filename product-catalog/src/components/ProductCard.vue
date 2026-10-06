@@ -15,9 +15,11 @@ const emit = defineEmits<{
 
 <template>
   <div class="product-card">
+    <h2><RouterLink :to="`/products/${product.id}`">{{ product.name }}</RouterLink></h2>
     <div class="header">
       <span class="badge">{{ product.category }}</span>
       <h3>{{ product.name }}</h3>
+      <p>Product ID: {{ product.id }}</p>
     </div>
 
     <p class="price">${{ product.price.toFixed(2) }}</p>

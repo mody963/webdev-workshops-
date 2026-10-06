@@ -76,6 +76,9 @@ const totalValue = computed(() => {
     return totalValue.value / productCount.value
   })
 
+  function getProduct(id: number): Product | undefined {
+    return products.value.find(p => p.id == id)
+  }
   // Pure Data Operations (No UI alerts or form resets here)
   function addProduct(productData: Omit<Product, 'id'>) {
     const newProduct: Product = {
@@ -107,6 +110,7 @@ const totalValue = computed(() => {
     totalValue,
     averageProductPrice,
     lastSaved,
+    getProduct,
     addProduct,
     updateProduct,
     deleteProduct,
