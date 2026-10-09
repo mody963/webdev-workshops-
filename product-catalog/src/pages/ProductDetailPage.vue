@@ -11,6 +11,7 @@ const product = getProduct(productId)
  
 <template>
 <div v-if="product">
+    <img v-if="product.image" :src="product.image" :alt="product.name" />
 <h1>{{ product.name }}</h1>
 <p>Price: ${{ product.price }}</p>
 <RouterLink to="/products">← Back to Products</RouterLink>

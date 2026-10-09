@@ -1,6 +1,8 @@
 import { ref, computed, watch } from 'vue'
 
 import type { Product } from '../types/Product'
+import type { FakeStoreProduct } from '../types/FakeStoreProduct'
+
 
 // export function useProducts() {
 //   // Reactive State
@@ -12,33 +14,38 @@ import type { Product } from '../types/Product'
 //     { id: 5, name: "Notebook", price: 5.49, description: "Dotted grid journal for note taking", stock: 25, category: "Stationery" },
 //   ])
 
-  export function useProducts() {
+export function useProducts() {
   // Reactive State
   const products = ref<Product[]>(JSON.parse(localStorage.getItem('products') || '[]'))
-watch(products, (latest) => {
- localStorage.setItem('products', JSON.stringify(latest))
- lastSaved.value = new Date().toLocaleTimeString()
-}, { deep: true})
-watch(
- () => products.value.find(p => p.price > 1000),
- (expensiveProduct) => {
- if (expensiveProduct) {
- console.log('Expensive product detected:', expensiveProduct.name)
- }
- }
-)
-const expensiveProduct = computed(() => {
-  return products.value.find(p => p.price > 1000)
-})
+  watch(products, (latest) => {
+    localStorage.setItem('products', JSON.stringify(latest))
+    lastSaved.value = new Date().toLocaleTimeString()
+  }, { deep: true })
+  watch(
+    () => products.value.find(p => p.price > 1000),
+    (expensiveProduct) => {
+      if (expensiveProduct) {
+        console.log('Expensive product detected:', expensiveProduct.name)
+      }
+    }
+  )
+  const expensiveProduct = computed(() => {
+    return products.value.find(p => p.price > 1000)
+  })
 
-const expensiveWarning = computed(() => {
-  if (!expensiveProduct.value) return null
-  return `Warning: High-value item detected — "${expensiveProduct.value.name}" is listed at $${expensiveProduct.value.price.toFixed(2)}.`
-})
-  
+  const expensiveWarning = computed(() => {
+    if (!expensiveProduct.value) return null
+    return `Warning: High-value item detected — "${expensiveProduct.value.name}" is listed at $${expensiveProduct.value.price.toFixed(2)}.`
+  })
+
+  const loading = ref(false)
+
+  const error = ref<string | null>(null)
+
+
   const lastSaved = ref<string | null>(null)
   // const editingId = ref<number | null>(null)
-// Exercise 2 State: Track unsaved changes
+  // Exercise 2 State: Track unsaved changes
   const hasUnsavedChanges = ref<boolean>(false)
 
   // Exercise 2 Watcher: Detect modifications to products and mark as dirty
@@ -59,17 +66,17 @@ const expensiveWarning = computed(() => {
   // Computed Properties
   const productCount = computed(() => products.value.length)
 
-const totalValue = computed(() => {
-  return products.value.reduce((sum, p) => sum + p.price * p.stock, 0)
-})
+  const totalValue = computed(() => {
+    return products.value.reduce((sum, p) => sum + p.price * p.stock, 0)
+  })
   watch(
-  () => totalValue.value,
-  (newTotal, oldTotal) => {
-    if (newTotal > 5000) {
-      console.log(`High inventory value alert! Total: $${newTotal.toFixed(2)} (was $${oldTotal?.toFixed(2) ?? 0})`)
+    () => totalValue.value,
+    (newTotal, oldTotal) => {
+      if (newTotal > 5000) {
+        console.log(`High inventory value alert! Total: $${newTotal.toFixed(2)} (was $${oldTotal?.toFixed(2) ?? 0})`)
+      }
     }
-  }
-)
+  )
 
   const averageProductPrice = computed(() => {
     if (products.value.length === 0) return 0
@@ -92,7 +99,7 @@ const totalValue = computed(() => {
     const product = products.value.find(p => p.id === updatedProduct.id)
 
     if (product) {
-    Object.assign(product, updatedProduct)
+      Object.assign(product, updatedProduct)
     }
   }
 
@@ -100,6 +107,45 @@ const totalValue = computed(() => {
     products.value = products.value.filter(p => p.id !== id)
   }
 
+  async function fetchProducts() {
+    if (loading.value) return
+    loading.value = true
+    error.value = null
+
+    try {
+      const response = await fetch('https://fakestoreapi.com/products')
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`)
+      }
+      const data: FakeStoreProduct[] = await response.json()
+
+      products.value = data.map(item => ({
+        id: item.id,
+        name: item.title,
+        price: item.price,
+        image: item.image,
+        description: item.description,
+        category: item.category,
+      }))
+    }
+    catch (err) {
+      error.value = err instanceof Error ? err.message : 'An unknown error occurred'
+
+    } finally {
+      loading.value = false
+
+    }
+
+  }
+
+
+
+
+  async function initProducts() {
+    if (localStorage.getItem('products') === null) {
+      await fetchProducts()
+    }
+  }
   function clearAllProducts() {
     products.value = []
   }
@@ -114,9 +160,13 @@ const totalValue = computed(() => {
     addProduct,
     updateProduct,
     deleteProduct,
+    fetchProducts,
+    initProducts,
     clearAllProducts,
     expensiveWarning,
     hasUnsavedChanges, // Exported for Exercise 2
+    loading,
+    error,
     saveAll,
   }
 

@@ -27,6 +27,7 @@ const newProductDescription = ref<string>('')
 const newProductStock = ref<number>(0)
 const newProductCategory = ref<string>('')
 const formError = ref<string>('')
+const newProductImage = ref<string>('')
 
 // Watch the prop: populate refs when editing, reset when null
 watch(
@@ -39,6 +40,7 @@ watch(
       newProductDescription.value = product.description
       newProductStock.value = product.stock
       newProductCategory.value = product.category
+      newProductImage.value = product.image || ''
     } else {
       resetInputs()
     }
@@ -53,6 +55,7 @@ function resetInputs() {
   newProductStock.value = 0
   newProductCategory.value = ''
   formError.value = ''
+  newProductImage.value = ''
 }
 
 function handleSubmit() {
@@ -67,8 +70,9 @@ function handleSubmit() {
     return
   }
 
+  const imageUrl = newProductImage.value.trim()
   // 2. Branch based on edit vs. create mode
-  if (props.editingProduct) {
+ if (props.editingProduct) {
     // EDIT MODE: Create a fresh object keeping the existing ID
     const updated: Product = {
       id: props.editingProduct.id,
@@ -77,6 +81,8 @@ function handleSubmit() {
       description: newProductDescription.value.trim(),
       stock: newProductStock.value,
       category: newProductCategory.value || 'General',
+      // Attach the image key only if a URL was provided
+      ...(imageUrl ? { image: imageUrl } : {}),
     }
 
     emit('update', updated)
@@ -129,6 +135,15 @@ function handleSubmit() {
         <option value="House">House</option>
         <option value="Books">Books</option>
       </select>
+    </label>
+    <!-- Optional Image Input -->
+    <label>
+      Image URL (optional)
+      <input
+        v-model="newProductImage"
+        type="url"
+        placeholder="https://example.com/item.jpg"
+      />
     </label>
 
     <!-- Dynamic button text based on mode -->

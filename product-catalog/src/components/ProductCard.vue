@@ -15,7 +15,20 @@ const emit = defineEmits<{
 
 <template>
   <div class="product-card">
-    <h2><RouterLink :to="`/products/${product.id}`">{{ product.name }}</RouterLink></h2>
+    <!-- 1. Product Image Thumbnail -->
+    <div v-if="product.image" class="image-wrapper">
+      <img
+        :src="product.image"
+        :alt="product.name"
+        referrerpolicy="no-referrer"
+        class="card-img"
+      />
+    </div>
+
+    <h2>
+      <RouterLink :to="`/products/${product.id}`">{{ product.name }}</RouterLink>
+    </h2>
+
     <div class="header">
       <span class="badge">{{ product.category }}</span>
       <h3>{{ product.name }}</h3>
@@ -47,6 +60,25 @@ const emit = defineEmits<{
   flex-direction: column;
   gap: 0.5rem;
   background-color: #fff;
+}
+
+/* Image thumbnail styling */
+.image-wrapper {
+  width: 100%;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.card-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .header {

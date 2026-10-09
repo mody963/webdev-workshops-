@@ -16,6 +16,10 @@ const {
   lastSaved,
   hasUnsavedChanges,
   saveAll,
+  fetchProducts,
+  initProducts,
+  loading,
+  error
 } = useProducts()
 
 const { count, increment, decrement } = useCounter()
@@ -58,6 +62,8 @@ function handleDelete(id: number) {
   deleteProduct(id)
 }
 
+
+
 function handleKeyPress(event: KeyboardEvent) {
   if (event.key === 'Escape' && editingProduct.value !== null) {
     cancelEdit()
@@ -66,6 +72,7 @@ function handleKeyPress(event: KeyboardEvent) {
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeyPress)
+  initProducts()
 })
 
 onUnmounted(() => {
@@ -74,32 +81,35 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="stats">
-    <div class="stat"><strong>Products:</strong> {{ productCount }}</div>
-    <div class="stat"><strong>Total Value:</strong> ${{ totalValue.toFixed(2) }}</div>
-    <div v-if="lastSaved">Last saved: {{ lastSaved }}</div>
-    <div>
-      <p v-if="hasUnsavedChanges" class="warning">You have unsaved changes!</p>
-      <button type="button" @click="saveAll">Save all</button>
+  <div v-if="loading" class="status-msg">Loading products...</div>
+  <div v-else-if="error" class="error">{{ error }}</div>
+  <div v-else>
+    <div class="stats">
+      <div class="stat"><strong>Products:</strong> {{ productCount }}</div>
+      <div class="stat"><strong>Total Value:</strong> ${{ totalValue.toFixed(2) }}</div>
+      <div v-if="lastSaved">Last saved: {{ lastSaved }}</div>
+      <div>
+        <p v-if="hasUnsavedChanges" class="warning">You have unsaved changes!</p>
+        <button type="button" @click="saveAll">Save all</button>
+      </div>
     </div>
-  </div>
 
-  <!-- Reusable Form Component -->
-  <ProductForm
-    :editing-product="editingProduct"
-    @add="handleAdd"
-    @update="handleUpdate"
-    @cancel="cancelEdit"
-  />
+    <!-- Reusable Form Component -->
+    <ProductForm
+      :editing-product="editingProduct"
+      @add="handleAdd"
+      @update="handleUpdate"
+      @cancel="cancelEdit"
+    />
 
-  <!-- Nested ProductList Component (Coordinates cards and re-emits actions) -->
-  <ProductList
-    :products="products"
-    @edit="startEditing"
-    @delete="handleDelete"
-  />
+    <!-- Nested ProductList Component (Coordinates cards and re-emits actions) -->
+    <ProductList
+      :products="products"
+      @edit="startEditing"
+      @delete="handleDelete"
+    />
+  </div> <!-- <-- Added missing closing tag here -->
 </template>
-
 <style scoped>
 h1 {
   color: #42b983;
