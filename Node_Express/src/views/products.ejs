@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+</head>
+<body>
+    <h1>Product List</h1>
+    <div>
+        <% if (products.length === 0) { %>
+            <p>No products available yet.</p>
+        <% } else { %>
+            <% products.forEach(product => { %>
+                <div style="border: 1px solid black; padding: 0.8rem; margin-bottom: 0.5rem;">
+                    <strong><%= product.name %></strong><br>
+                    <p><%= product.description %></p>
+                    <p>Price: $<%= product.price %></p>
+                </div>
+            <% }) %>
+        <% } %>
+    </div>
+    <a href="/add-product">Add another product</a>
+</body>
+</html>
