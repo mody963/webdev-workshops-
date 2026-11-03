@@ -33,6 +33,19 @@ async function handleAddProduct(req: Request, res: Response) {
  res.render("add-product", { message: "Product added" });
 }
 
+async function showSingleProduct(req: Request, res: Response) {
+    const paramId = parseInt(req.params.id as string);
+    const product = await productRepository.findOneBy({ id: paramId });
+    
+    // 1. Render the view and pass the product data
+    res.render("product", { product: product });
+}
+async function deleteProduct(req: Request, res: Response) {
+    const paramId = parseInt(req.params.id as string);
+    await productRepository.delete({ id: paramId });
+    res.redirect("/products");
+}
+
+export { showProducts, showAddProductPage, handleAddProduct, showSingleProduct, deleteProduct }
 
 
-export {showProducts, showAddProductPage, handleAddProduct}
