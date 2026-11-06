@@ -34,4 +34,3 @@ async function seedProducts() {
 }
 
 export {seedProducts}
-// You can call seedProducts() right after AppDataSource.initialize() in your index.ts
