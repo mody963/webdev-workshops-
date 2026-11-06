@@ -4,6 +4,8 @@ import homeRouter from "./routes/home.routes.js";
 import productRouter from "./routes/product.routes.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { seedCategories } from "./utils/seed-categories.js";
+import {seedProducts} from "./utils/seed-products.js";
 
 import "reflect-metadata";
 import { AppDataSource } from "./data-source.js"; // your TypeORM data source
@@ -20,7 +22,10 @@ app.set("views", path.join(__dirname, "views"));
 
 // Initialize Database Connection First
 AppDataSource.initialize()
-  .then(() => {
+ .then(async () => {
+ console.log("Database connected");
+ await seedCategories();
+ await seedProducts();
     console.log("Database connected");
 
     // Middlewares
@@ -39,6 +44,11 @@ AppDataSource.initialize()
     app.use((req: Request, res: Response) => {
       res.status(404).send("<h1>404 - Page Not Found</h1>");
     });
+
+    app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+      console.error("Error:", err);
+      res.status(err.status || 500).send(err.message || "Internal Server Error");
+      });
 
     // Start server
     app.listen(PORT, () => {
