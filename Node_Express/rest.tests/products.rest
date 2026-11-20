@@ -1,0 +1,25 @@
+
+GET http://localhost:3000/api/products
+###
+GET http://localhost:3000/api/products/1
+###
+
+GET http://localhost:3000/api/products/8999
+###
+Get http://localhost:3000/api/products?categoryId=1
+
+###
+Get http://localhost:3000/api/products?name=The Lord of the Rings
+
+###
+Get http://localhost:3000/api/products?name=The
+
+###
+POST http://localhost:3000/api/products
+Content-Type: application/json
+
+{
+    "name": "The Hobbit",
+    "description": "A fantasy adventure novel",
+    "price": 19.99
+}

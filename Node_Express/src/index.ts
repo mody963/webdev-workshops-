@@ -9,6 +9,8 @@ import {seedProducts} from "./utils/seed-products.js";
 
 import "reflect-metadata";
 import { AppDataSource } from "./data-source.js"; // your TypeORM data source
+import productApiRouter from "./routes/api/product.routes.js";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,7 +31,11 @@ AppDataSource.initialize()
     console.log("Database connected");
 
     // Middlewares
+    //body uit ssr body naar json
     app.use(express.urlencoded({ extended: true }));
+    // body uit json request naar echte json
+    app.use(express.json());
+    app.use(cors());
 
     app.use((req: Request, res: Response, next: NextFunction) => {
       console.log(`Request: ${req.method} ${req.url}`);
@@ -38,6 +44,7 @@ AppDataSource.initialize()
 
     // Register Routes after database is ready
     app.use("/shop", homeRouter);
+    app.use("/api/products", productApiRouter);
     app.use(productRouter);
 
     // 404 handler
